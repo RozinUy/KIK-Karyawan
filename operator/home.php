@@ -14,7 +14,7 @@
   <!-- ChartJS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../style/home.css">
 </head>
 <body>
 
@@ -46,7 +46,6 @@
     <!-- NAVBAR -->
     <nav class="navbar navbar-light bg-white shadow-sm mb-4">
       <div class="container-fluid">
-        <input class="form-control w-50" placeholder="Cari sesuatu...">
         <div>
           <span class="me-3">SMARTPRESENCE TRIAL</span>
           <i class="bi bi-box-arrow-right"></i>
