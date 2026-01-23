@@ -1,3 +1,53 @@
+<?php
+session_start();
+require_once __DIR__ . '/koneksidb.php';
+
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $email = trim($_POST['email'] ?? '');
+  $password = $_POST['password'] ?? '';
+  if ($email === '' || $password === '') {
+    $error = 'Email dan password wajib diisi.';
+  } else {
+    $stmt = $conn->prepare('SELECT id, nama, password FROM admin WHERE email = ? LIMIT 1');
+    if ($stmt) {
+      $stmt->bind_param('s', $email);
+      $stmt->execute();
+      $res = $stmt->get_result();
+      if ($row = $res->fetch_assoc()) {
+        $hash = $row['password'];
+        if (password_verify($password, $hash) || $password === $hash) {
+          $_SESSION['user_id'] = $row['id'];
+          $_SESSION['nama'] = $row['nama'] ?? 'Admin';
+          $_SESSION['role'] = 'admin';
+          header('Location: operator/home.php');
+          exit;
+        }
+      }
+      $stmt->close();
+    }
+    $stmt = $conn->prepare('SELECT id, nama, password FROM user WHERE email = ? LIMIT 1');
+    if ($stmt) {
+      $stmt->bind_param('s', $email);
+      $stmt->execute();
+      $res = $stmt->get_result();
+      if ($row = $res->fetch_assoc()) {
+        $hash = $row['password'];
+        if (password_verify($password, $hash) || $password === $hash) {
+          $_SESSION['user_id'] = $row['id'];
+          $_SESSION['nama'] = $row['nama'] ?? 'Pengguna';
+          $_SESSION['role'] = 'user';
+          header('Location: pengguna/home.php');
+          exit;
+        }
+      }
+      $stmt->close();
+    }
+    $error = 'Email atau password tidak valid.';
+  }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -239,6 +289,11 @@
 </head>
 <body>
 
+<?php if ($error): ?>
+  <div class="container mb-3" style="max-width: 450px;">
+    <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+  </div>
+<?php endif; ?>
   <div class="login-card">
     <div class="card-header">
       <div class="user-icon">
@@ -248,17 +303,17 @@
     </div>
 
     <div class="card-body">
-      <form id="loginForm">
+      <form id="loginForm" method="post" action="">
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" class="form-control" placeholder="Enter email" required id="emailInput">
+          <input type="email" name="email" class="form-control" placeholder="Enter email" required id="emailInput">
           <div class="error-message" id="emailError">Please enter a valid email address</div>
         </div>
 
         <div class="form-group">
           <label class="form-label">Password</label>
           <div class="password-wrapper">
-            <input type="password" class="form-control" id="passwordInput" placeholder="Enter password" required>
+            <input type="password" name="password" class="form-control" id="passwordInput" placeholder="Enter password" required>
             <button type="button" class="password-toggle" id="togglePassword">
               <i class="bi bi-eye"></i>
             </button>
@@ -335,52 +390,7 @@
       }
     });
     
-    // Form submission
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      const rememberMe = document.getElementById('rememberMe').checked;
-      
-      // Reset errors
-      emailError.style.display = 'none';
-      passwordError.style.display = 'none';
-      
-      let isValid = true;
-      
-      // Validate email
-      if (!validateEmail(email)) {
-        emailError.style.display = 'block';
-        isValid = false;
-      }
-      
-      // Validate password
-      if (!validatePassword(password)) {
-        passwordError.style.display = 'block';
-        isValid = false;
-      }
-      
-      if (!isValid) {
-        return;
-      }
-      
-      // Simulate login process
-      const submitBtn = this.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      
-      submitBtn.textContent = 'Logging in...';
-      submitBtn.disabled = true;
-      
-      setTimeout(() => {
-        alert(`Login successful!\n\nEmail: ${email}\nRemember me: ${rememberMe ? 'Yes' : 'No'}`);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-        
-        // Reset form
-        this.reset();
-      }, 1500);
-    });
+
   </script>
 </body>
 </html>

@@ -1,3 +1,43 @@
+<?php
+require_once __DIR__ . '/koneksidb.php';
+$success = '';
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $nama = trim($_POST['name'] ?? '');
+  $email = trim($_POST['email'] ?? '');
+  $password = $_POST['password'] ?? '';
+  if ($nama === '' || $email === '' || $password === '') {
+    $error = 'Semua field wajib diisi.';
+  } else {
+    $stmt = $conn->prepare('SELECT id FROM user WHERE email = ? LIMIT 1');
+    if ($stmt) {
+      $stmt->bind_param('s', $email);
+      $stmt->execute();
+      $res = $stmt->get_result();
+      if ($res->num_rows > 0) {
+        $error = 'Email sudah terdaftar.';
+      } else {
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        $stmt2 = $conn->prepare('INSERT INTO user (nama, email, password) VALUES (?, ?, ?)');
+        if ($stmt2) {
+          $stmt2->bind_param('sss', $nama, $email, $hash);
+          if ($stmt2->execute()) {
+            $success = 'Registrasi berhasil. Silakan login.';
+          } else {
+            $error = 'Gagal menyimpan data.';
+          }
+          $stmt2->close();
+        } else {
+          $error = 'Kesalahan server.';
+        }
+      }
+      $stmt->close();
+    } else {
+      $error = 'Kesalahan server.';
+    }
+  }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -275,6 +315,16 @@
 </head>
 <body>
 
+<?php if ($error): ?>
+  <div class="container mb-3" style="max-width: 480px;">
+    <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+  </div>
+<?php endif; ?>
+<?php if ($success): ?>
+  <div class="container mb-3" style="max-width: 480px;">
+    <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+  </div>
+<?php endif; ?>
   <div class="register-card">
     <div class="card-header">
       <div class="user-icon">
@@ -284,23 +334,23 @@
     </div>
 
     <div class="card-body">
-      <form id="registerForm">
+      <form id="registerForm" method="post" action="">
         <div class="form-group" id="nameGroup">
           <label class="form-label">Full Name</label>
-          <input type="text" class="form-control" placeholder="Enter your full name" required id="nameInput">
+          <input type="text" name="name" class="form-control" placeholder="Enter your full name" required id="nameInput">
           <div class="error-message" id="nameError">Name must be at least 3 characters</div>
         </div>
 
         <div class="form-group" id="emailGroup">
           <label class="form-label">Email</label>
-          <input type="email" class="form-control" placeholder="Enter email" required id="emailInput">
+          <input type="email" name="email" class="form-control" placeholder="Enter email" required id="emailInput">
           <div class="error-message" id="emailError">Please enter a valid email address</div>
         </div>
 
         <div class="form-group" id="passwordGroup">
           <label class="form-label">Password</label>
           <div class="password-wrapper">
-            <input type="password" class="form-control" id="passwordInput" placeholder="Enter password" required>
+            <input type="password" name="password" class="form-control" id="passwordInput" placeholder="Enter password" required>
             <button type="button" class="password-toggle" id="togglePassword">
               <i class="bi bi-eye"></i>
             </button>
@@ -335,7 +385,7 @@
 
         <div class="login-link-container">
           Sudah punya akun?
-          <a href="login.php" class="login-link">Login</a>
+          <a href="Login.php" class="login-link">Login</a>
         </div>
       </form>
     </div>
@@ -550,97 +600,7 @@
       termsError.style.display = this.checked ? 'none' : 'block';
     });
     
-    // Form submission
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const name = nameInput.value;
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      const confirmPassword = confirmPasswordInput.value;
-      const termsAgreed = termsCheckbox.checked;
-      
-      // Reset all errors
-      nameError.style.display = 'none';
-      emailError.style.display = 'none';
-      passwordError.style.display = 'none';
-      confirmPasswordError.style.display = 'none';
-      confirmPasswordSuccess.style.display = 'none';
-      termsError.style.display = 'none';
-      
-      // Remove all validation classes
-      nameGroup.classList.remove('invalid', 'valid');
-      emailGroup.classList.remove('invalid', 'valid');
-      passwordGroup.classList.remove('invalid', 'valid');
-      confirmPasswordGroup.classList.remove('invalid', 'valid');
-      
-      let isValid = true;
-      
-      // Validate name
-      if (!validateName(name)) {
-        nameError.style.display = 'block';
-        nameGroup.classList.add('invalid');
-        isValid = false;
-      } else {
-        nameGroup.classList.add('valid');
-      }
-      
-      // Validate email
-      if (!validateEmail(email)) {
-        emailError.style.display = 'block';
-        emailGroup.classList.add('invalid');
-        isValid = false;
-      } else {
-        emailGroup.classList.add('valid');
-      }
-      
-      // Validate password
-      if (!validatePassword(password)) {
-        passwordError.style.display = 'block';
-        passwordGroup.classList.add('invalid');
-        isValid = false;
-      } else {
-        passwordGroup.classList.add('valid');
-      }
-      
-      // Validate password confirmation
-      if (password !== confirmPassword) {
-        confirmPasswordError.style.display = 'block';
-        confirmPasswordGroup.classList.add('invalid');
-        isValid = false;
-      } else if (confirmPassword !== '') {
-        confirmPasswordSuccess.style.display = 'block';
-        confirmPasswordGroup.classList.add('valid');
-      }
-      
-      // Validate terms agreement
-      if (!termsAgreed) {
-        termsError.style.display = 'block';
-        isValid = false;
-      }
-      
-      if (!isValid) {
-        return;
-      }
-      
-      // Simulate registration process
-      const submitBtn = this.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      
-      submitBtn.textContent = 'Creating Account...';
-      submitBtn.disabled = true;
-      
-      setTimeout(() => {
-        alert(`Registration successful!\n\nWelcome ${name}! Your account has been created.\nEmail: ${email}`);
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-        
-        // Redirect to login page after successful registration
-        setTimeout(() => {
-          window.location.href = 'login.php';
-        }, 1000);
-      }, 2000);
-    });
+
   </script>
 </body>
 </html>

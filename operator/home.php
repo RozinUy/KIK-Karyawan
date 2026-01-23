@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+  header('Location: ../Login.php');
+  exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -34,9 +41,6 @@
       <li class="nav-item">
         <a class="nav-link" href="#"><i class="bi bi-calendar-check"></i> Presensi</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#"><i class="bi bi-gear"></i> Pengaturan</a>
-      </li>
     </ul>
   </aside>
 
@@ -45,13 +49,17 @@
 
     <!-- NAVBAR -->
     <nav class="navbar navbar-light bg-white shadow-sm mb-4">
-      <div class="container-fluid">
+      <div class="container-fluid d-flex justify-content-between align-items-center">
         <div>
-          <span class="me-3">SMARTPRESENCE TRIAL</span>
-          <i class="bi bi-box-arrow-right"></i>
+          <span class="fw-semibold">SMARTPRESENCE HOME</span>
+        </div>
+        <div>
+          <a href="../Login.php?logout=1" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </a>
         </div>
       </div>
-    </nav>
+    </nav>>
 
     <!-- CARDS -->
     <div class="row g-3 mb-4">
