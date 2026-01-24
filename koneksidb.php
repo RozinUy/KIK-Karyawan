@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Jakarta'); // Set Timezone to Indonesia/Surabaya (WIB)
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $DB_HOST = 'localhost';
