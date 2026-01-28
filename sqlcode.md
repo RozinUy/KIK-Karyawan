@@ -1,10 +1,3 @@
-# Full Database Setup (Admin & User)
-
-Berikut adalah struktur database lengkap untuk memulai dari awal. Script ini membuat tabel `admin` dan `user` beserta data dummy untuk login.
-
-**Catatan:** Password default di bawah ini belum di-hash (plain text) untuk kemudahan tes awal. Sistem login Anda (`Login.php`) mendukung password plain text sementara (`$password === $hash`). Untuk produksi, pastikan password di-hash.
-
-```sql
 -- 1. Buat Database (Jika belum ada)
 CREATE DATABASE IF NOT EXISTS kik_karyawan;
 USE kik_karyawan;
@@ -33,18 +26,19 @@ CREATE TABLE IF NOT EXISTS `user` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. Insert Data Dummy (Default Login)
+-- 4. Buat Tabel Presensi
+CREATE TABLE IF NOT EXISTS `presensi` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `tanggal` date NOT NULL,
+  `jam_masuk` time NOT NULL,
+  `jam_keluar` time DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `fk_presensi_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Admin (Email: admin@kik.com, Pass: admin123)
+-- 5. Insert Data Dummy Admin (Email: admin@gmail.com, Pass: admin123)
 INSERT INTO `admin` (`nama`, `email`, `password`) VALUES
 ('Administrator', 'admin@gmail.com', 'admin123');
-```
-
-### Jika Tabel Sudah Ada (Update Only)
-Jika Anda tidak ingin menghapus tabel yang sudah ada, gunakan perintah ini untuk menambahkan kolom baru ke tabel `user`:
-
-```sql
-ALTER TABLE user ADD COLUMN divisi VARCHAR(50) DEFAULT 'Staff' AFTER email;
-ALTER TABLE user ADD COLUMN jam_masuk TIME DEFAULT '08:00:00' AFTER divisi;
-ALTER TABLE user ADD COLUMN jam_keluar TIME DEFAULT '17:00:00' AFTER jam_masuk;
-```

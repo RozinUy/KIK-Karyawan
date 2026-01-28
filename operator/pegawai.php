@@ -16,6 +16,9 @@ if (isset($_POST['add_employee'])) {
   $nama = trim($_POST['nama']);
   $email = trim($_POST['email']);
   $password = $_POST['password'];
+  $divisi = trim($_POST['divisi']);
+  $jam_masuk = $_POST['jam_masuk'];
+  $jam_keluar = $_POST['jam_keluar'];
 
   // Check if email exists
   $stmt = $conn->prepare("SELECT id FROM user WHERE email = ?");
@@ -25,8 +28,8 @@ if (isset($_POST['add_employee'])) {
     $error_msg = "Email sudah terdaftar!";
   } else {
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $conn->prepare("INSERT INTO user (nama, email, password) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $nama, $email, $hash);
+    $stmt = $conn->prepare("INSERT INTO user (nama, email, password, divisi, jam_masuk, jam_keluar, role) VALUES (?, ?, ?, ?, ?, ?, 'pegawai')");
+    $stmt->bind_param("ssssss", $nama, $email, $hash, $divisi, $jam_masuk, $jam_keluar);
     if ($stmt->execute()) {
       $success_msg = "Pegawai berhasil ditambahkan.";
     } else {
@@ -40,10 +43,13 @@ if (isset($_POST['edit_employee'])) {
   $id = $_POST['id'];
   $nama = trim($_POST['nama']);
   $email = trim($_POST['email']);
+  $divisi = trim($_POST['divisi']);
+  $jam_masuk = $_POST['jam_masuk'];
+  $jam_keluar = $_POST['jam_keluar'];
 
-  $sql = "UPDATE user SET nama = ?, email = ?";
-  $params = [$nama, $email];
-  $types = "ss";
+  $sql = "UPDATE user SET nama = ?, email = ?, divisi = ?, jam_masuk = ?, jam_keluar = ?";
+  $params = [$nama, $email, $divisi, $jam_masuk, $jam_keluar];
+  $types = "sssss";
 
   // Only update password if provided
   if (!empty($_POST['password'])) {
@@ -198,7 +204,7 @@ $result = $conn->query("SELECT * FROM user ORDER BY nama ASC");
               </h6>
 
               <div class="d-flex gap-2">
-                <button class="btn btn-primary btn-sm">
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                   <i class="bi bi-plus-lg"></i> Create
                 </button>
               </div>
@@ -215,6 +221,7 @@ $result = $conn->query("SELECT * FROM user ORDER BY nama ASC");
                     <th>Nama</th>
                     <th>Email</th>
                     <th>Divisi</th>
+                    <th>Jam Kerja</th>
                     <th class="text-center" width="18%">Actions</th>
                   </tr>
                 </thead>
@@ -226,14 +233,28 @@ $result = $conn->query("SELECT * FROM user ORDER BY nama ASC");
                       <td><?= htmlspecialchars($row['nama']) ?></td>
                       <td><?= htmlspecialchars($row['email']) ?></td>
                       <td><?= $row['divisi'] ?? '-' ?></td>
+                      <td>
+                        <span class="badge bg-info text-dark">
+                          <?= date('H:i', strtotime($row['jam_masuk'])) ?> - <?= date('H:i', strtotime($row['jam_keluar'])) ?>
+                        </span>
+                      </td>
                       <td class="text-center">
-                        <button class="btn btn-sm btn-primary">Update</button>
+                        <button class="btn btn-sm btn-primary edit-btn" 
+                          data-id="<?= $row['id'] ?>"
+                          data-nama="<?= htmlspecialchars($row['nama']) ?>"
+                          data-email="<?= htmlspecialchars($row['email']) ?>"
+                          data-divisi="<?= htmlspecialchars($row['divisi'] ?? '') ?>"
+                          data-masuk="<?= $row['jam_masuk'] ?>"
+                          data-keluar="<?= $row['jam_keluar'] ?>"
+                          data-bs-toggle="modal" 
+                          data-bs-target="#editEmployeeModal">
+                          Update
+                        </button>
                         <a href="?delete=<?= $row['id'] ?>"
                           class="btn btn-sm btn-danger"
                           onclick="return confirm('Yakin hapus data?')">
                           Delete
                         </a>
-                        <button class="btn btn-sm btn-success">Detail</button>
                       </td>
                     </tr>
                   <?php endwhile; ?>
@@ -296,6 +317,27 @@ $result = $conn->query("SELECT * FROM user ORDER BY nama ASC");
               <input type="email" name="email" class="form-control" required>
             </div>
             <div class="mb-3">
+              <label class="form-label">Divisi</label>
+              <select name="divisi" class="form-select">
+                <option value="Staff">Staff</option>
+                <option value="HRD">HRD</option>
+                <option value="Finance">Finance</option>
+                <option value="IT">IT</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Operasional">Operasional</option>
+              </select>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Jam Masuk</label>
+                <input type="time" name="jam_masuk" class="form-control" value="08:00" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Jam Keluar</label>
+                <input type="time" name="jam_keluar" class="form-control" value="17:00" required>
+              </div>
+            </div>
+            <div class="mb-3">
               <label class="form-label">Password</label>
               <input type="password" name="password" class="form-control" required>
             </div>
@@ -329,6 +371,27 @@ $result = $conn->query("SELECT * FROM user ORDER BY nama ASC");
               <input type="email" name="email" id="edit_email" class="form-control" required>
             </div>
             <div class="mb-3">
+              <label class="form-label">Divisi</label>
+              <select name="divisi" id="edit_divisi" class="form-select">
+                <option value="Staff">Staff</option>
+                <option value="HRD">HRD</option>
+                <option value="Finance">Finance</option>
+                <option value="IT">IT</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Operasional">Operasional</option>
+              </select>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Jam Masuk</label>
+                <input type="time" name="jam_masuk" id="edit_jam_masuk" class="form-control" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Jam Keluar</label>
+                <input type="time" name="jam_keluar" id="edit_jam_keluar" class="form-control" required>
+              </div>
+            </div>
+            <div class="mb-3">
               <label class="form-label">Password Baru (Kosongkan jika tidak diubah)</label>
               <input type="password" name="password" class="form-control" placeholder="******">
             </div>
@@ -351,6 +414,9 @@ $result = $conn->query("SELECT * FROM user ORDER BY nama ASC");
         document.getElementById('edit_id').value = this.getAttribute('data-id');
         document.getElementById('edit_nama').value = this.getAttribute('data-nama');
         document.getElementById('edit_email').value = this.getAttribute('data-email');
+        document.getElementById('edit_divisi').value = this.getAttribute('data-divisi');
+        document.getElementById('edit_jam_masuk').value = this.getAttribute('data-masuk');
+        document.getElementById('edit_jam_keluar').value = this.getAttribute('data-keluar');
       });
     });
   </script>

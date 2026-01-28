@@ -184,7 +184,7 @@ $json_data = json_encode($chart_data);
                 <div class="text-uppercase small fw-bold mb-1 opacity-75">Hadir Hari Ini</div>
                 <div class="h2 mb-0 fw-bold"><?php echo $sudah_presensi; ?></div>
                 <div class="small opacity-75 mt-2">
-                    <i class="bi bi-arrow-return-right me-1"></i> <?php echo $sudah_pulang; ?> Selesai Kerja
+                    <i class=""></i> <?php echo $sudah_pulang; ?> Selesai Kerja
                 </div>
                 <i class="bi bi-check-circle-fill"></i>
               </div>
