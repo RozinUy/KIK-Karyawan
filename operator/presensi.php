@@ -27,7 +27,7 @@ $filter_tgl = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
 $filter_bulan = isset($_GET['bulan']) ? $_GET['bulan'] : '';
 $is_filter_bulan = !empty($filter_bulan);
 
-$sql = "SELECT p.*, u.nama 
+$sql = "SELECT p.id as presensi_id, p.*, u.nama 
         FROM presensi p 
         JOIN user u ON p.user_id = u.id ";
 
@@ -205,7 +205,7 @@ $result = $conn->query($sql);
                                         ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="?delete=<?php echo $row['id']; ?>&tanggal=<?php echo $filter_tgl; ?>&bulan=<?php echo $filter_bulan; ?>" 
+                                        <a href="?delete=<?php echo $row['presensi_id']; ?>&tanggal=<?php echo $filter_tgl; ?>&bulan=<?php echo $filter_bulan; ?>" 
                                            class="btn btn-sm btn-light text-danger shadow-sm border" 
                                            onclick="return confirm('Hapus data presensi ini? Pegawai harus melakukan check-in ulang.')" 
                                            title="Hapus & Reset">

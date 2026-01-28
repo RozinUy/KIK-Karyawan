@@ -28,10 +28,31 @@ try {
 $success_msg = '';
 $error_msg = '';
 
+// Default values for form (Fallback)
+$default_masuk_val = '08:00';
+$default_keluar_val = '17:00';
+
+// Smart Default: Get the most common schedule from existing users
+$sql_common = "SELECT jam_masuk, jam_keluar, COUNT(*) as cnt FROM user WHERE jam_masuk IS NOT NULL GROUP BY jam_masuk, jam_keluar ORDER BY cnt DESC LIMIT 1";
+$res_common = $conn->query($sql_common);
+if ($res_common && $res_common->num_rows > 0) {
+    $row_common = $res_common->fetch_assoc();
+    if (!empty($row_common['jam_masuk'])) {
+        $default_masuk_val = substr($row_common['jam_masuk'], 0, 5);
+    }
+    if (!empty($row_common['jam_keluar'])) {
+        $default_keluar_val = substr($row_common['jam_keluar'], 0, 5);
+    }
+}
+
 // Handle Bulk Update (Default Setting)
 if (isset($_POST['bulk_update'])) {
     $jam_masuk = $_POST['default_masuk'];
     $jam_keluar = $_POST['default_keluar'];
+    
+    // Keep the values in the form (Override DB value with user input)
+    $default_masuk_val = $jam_masuk;
+    $default_keluar_val = $jam_keluar;
     
     $stmt = $conn->prepare("UPDATE user SET jam_masuk = ?, jam_keluar = ?");
     $stmt->bind_param("ss", $jam_masuk, $jam_keluar);
@@ -158,11 +179,11 @@ $result = $conn->query("SELECT * FROM user ORDER BY nama ASC");
                 <form action="" method="POST" class="row g-3 align-items-end" onsubmit="return confirm('PERINGATAN: Ini akan mengubah jadwal SEMUA pegawai menjadi jam yang dipilih. Lanjutkan?');">
                     <div class="col-md-4">
                         <label class="form-label fw-bold text-secondary small">Jam Masuk Default</label>
-                        <input type="time" name="default_masuk" class="form-control" value="08:00" required>
+                        <input type="time" name="default_masuk" class="form-control" value="<?php echo $default_masuk_val; ?>" required>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold text-secondary small">Jam Keluar Default</label>
-                        <input type="time" name="default_keluar" class="form-control" value="17:00" required>
+                        <input type="time" name="default_keluar" class="form-control" value="<?php echo $default_keluar_val; ?>" required>
                     </div>
                     <div class="col-md-4">
                         <button type="submit" name="bulk_update" class="btn btn-primary w-100"><i class="bi bi-check-all me-2"></i>Terapkan ke Semua</button>

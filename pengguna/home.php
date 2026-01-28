@@ -165,10 +165,10 @@ while ($row = $res_history->fetch_assoc()) {
         <a class="nav-link active rounded" href="home.php"><i class="bi bi-grid-fill me-3"></i>Dashboard</a>
       </li>
       <li class="nav-item mb-1">
-        <a class="nav-link rounded" href="#"><i class="bi bi-clock-history me-3"></i>Riwayat Absensi</a>
+        <a class="nav-link rounded" href="riwayat.php"><i class="bi bi-clock-history me-3"></i>Riwayat Absensi</a>
       </li>
       <li class="nav-item mb-1">
-        <a class="nav-link rounded" href="#"><i class="bi bi-person-circle me-3"></i>Profil Saya</a>
+        <a class="nav-link rounded" href="profil.php"><i class="bi bi-person-circle me-3"></i>Profil Saya</a>
       </li>
     </ul>
   </aside>
@@ -192,7 +192,7 @@ while ($row = $res_history->fetch_assoc()) {
                <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($nama_user); ?>&background=random" class="rounded-circle" width="38" height="38" alt="Profile">
                <div class="d-none d-sm-block text-start">
                    <div class="fw-semibold small"><?php echo htmlspecialchars($nama_user); ?></div>
-                   <div class="text-muted" style="font-size: 11px;"><?php echo htmlspecialchars($user_divisi); ?></div>
+                   <span class="badge bg-primary text-white rounded-pill" style="font-size: 11px;"><?php echo htmlspecialchars($user_divisi); ?></span>
                </div>
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
@@ -393,10 +393,10 @@ while ($row = $res_history->fetch_assoc()) {
         <a class="nav-link text-white active bg-primary rounded" href="home.php"><i class="bi bi-grid-fill me-3"></i>Dashboard</a>
       </li>
       <li class="nav-item mb-1">
-        <a class="nav-link text-white-50 rounded" href="#"><i class="bi bi-clock-history me-3"></i>Riwayat Absensi</a>
+        <a class="nav-link text-white-50 rounded" href="riwayat.php"><i class="bi bi-clock-history me-3"></i>Riwayat Absensi</a>
       </li>
       <li class="nav-item mb-1">
-        <a class="nav-link text-white-50 rounded" href="#"><i class="bi bi-person-circle me-3"></i>Profil Saya</a>
+        <a class="nav-link text-white-50 rounded" href="profil.php"><i class="bi bi-person-circle me-3"></i>Profil Saya</a>
       </li>
       <li class="nav-item mt-3 pt-3 border-top border-secondary">
         <a class="nav-link text-danger rounded" href="../Login.php?logout=1"><i class="bi bi-box-arrow-right me-3"></i>Logout</a>

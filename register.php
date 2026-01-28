@@ -315,16 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-<?php if ($error): ?>
-  <div class="container mb-3" style="max-width: 480px;">
-    <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
-  </div>
-<?php endif; ?>
-<?php if ($success): ?>
-  <div class="container mb-3" style="max-width: 480px;">
-    <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
-  </div>
-<?php endif; ?>
+
   <div class="register-card">
     <div class="card-header">
       <div class="user-icon">
@@ -391,9 +382,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
 
+  <!-- Error Modal -->
+  <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="errorModalLabel">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>Registrasi Gagal
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <?php echo htmlspecialchars($error); ?>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="successModalLabel">
+            <i class="bi bi-check-circle-fill me-2"></i>Registrasi Berhasil
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <?php echo htmlspecialchars($success); ?>
+        </div>
+        <div class="modal-footer">
+          <a href="Login.php" class="btn btn-primary">Login Sekarang</a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Bootstrap 5 JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   
+  <?php if ($error): ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+      errorModal.show();
+    });
+  </script>
+  <?php endif; ?>
+
+  <?php if ($success): ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+      successModal.show();
+    });
+  </script>
+  <?php endif; ?>
+
   <script>
     // Toggle password visibility
     document.getElementById('togglePassword').addEventListener('click', function() {
